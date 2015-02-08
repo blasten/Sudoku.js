@@ -1,7 +1,6 @@
 'use strict';
 
 var del = require('del');
-
 var gulp = require('gulp');
 var sass = require('gulp-sass');
 var minifyCSS = require('gulp-minify-css');
@@ -11,12 +10,12 @@ var handlebars = require('gulp-compile-handlebars');
 var browserify = require('gulp-browserify');
 var uglify = require('gulp-uglify');
 
-
-var jsPath = './client/js/app.js';
-var sassPath = './client/sass/*.scss';
-var templatePath = './client/templates/**.hbs';
-var templatePartialPath = './client/templates/partials';
+var jsPath = './client/js/';
+var sassPath = './client/sass/';
+var templatePath = './client/templates/';
 var buildPath = './build';
+var locale = require('./locales/en_US');
+
 
 gulp.task('default', ['watch', 'build']);
 
@@ -25,9 +24,9 @@ gulp.task('clean', function() {
 });
 
 gulp.task('watch', function() {
-    gulp.watch(jsPath, ['build-scripts']);
-    gulp.watch(sassPath, ['build-sass']);
-    gulp.watch(templatePath, ['build-templates']);
+    gulp.watch(jsPath + '**/*.js', ['build-scripts']);
+    gulp.watch(sassPath + '*.scss', ['build-sass']);
+    gulp.watch(templatePath + '**/*.hbs', ['build-templates']);
 });
 
 gulp.task('build', ['build-scripts', 'build-sass', 'build-templates']);
@@ -39,10 +38,10 @@ gulp.task('test', function() {
 
 // compiles the javascript files
 gulp.task('build-scripts', function() {
-    gulp.src(jsPath)
+    gulp.src(jsPath + 'app.js')
         .pipe(browserify({
           insertGlobals : false,
-          debug : !gulp.env.production
+          debug : false
         }))
         .pipe(gulp.dest(buildPath + '/js'))
         .pipe(uglify())
@@ -52,7 +51,7 @@ gulp.task('build-scripts', function() {
 
 // compiles the Sass files and minimizes them
 gulp.task('build-sass', function() {
-    gulp.src(sassPath)
+    gulp.src(sassPath + '*.scss')
         .pipe(sass())
         .pipe(sourcemaps.init())
         .pipe(rename('app.css'))
@@ -66,12 +65,10 @@ gulp.task('build-sass', function() {
 
 // builds the handlebars templates
 gulp.task('build-templates', function() {
-    var templateData = {
-        homeTitle: 'Sudoku'
-    };
+    var templateData = locale;
     var options = {
-        ignorePartials: true,
-        batch : [templatePartialPath],
+        ignorePartials: false,
+        batch : [templatePath],
         helpers: {
             cssAsset: function(file) {
                 return 'css/' + file + '.min.css';
@@ -82,7 +79,7 @@ gulp.task('build-templates', function() {
         }
     };
  
-    gulp.src(templatePath)
+    gulp.src(templatePath + 'index.hbs')
         .pipe(handlebars(templateData, options))
         .pipe(rename('index.html'))
         .pipe(gulp.dest(buildPath));
