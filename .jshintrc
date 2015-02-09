@@ -1,10 +1,17 @@
 {
-  "node": true,
-
-  "curly": true,
-  "latedef": true,
-  "quotmark": true,
-  "undef": true,
-  "unused": true,
-  "trailing": true
+    "node": true,
+    "curly": true,
+    "latedef": true,
+    "quotmark": true,
+    "undef": true,
+    "unused": true,
+    "trailing": true,
+    "globals": {
+        "describe"   : false,
+        "it"         : false,
+        "before"     : false,
+        "beforeEach" : false,
+        "after"      : false,
+        "afterEach"  : false
+    }
 }

@@ -9,15 +9,17 @@ var rename = require('gulp-rename');
 var handlebars = require('gulp-compile-handlebars');
 var browserify = require('gulp-browserify');
 var uglify = require('gulp-uglify');
+var mocha = require('gulp-mocha');
 
 var jsPath = './client/js/';
 var sassPath = './client/sass/';
 var templatePath = './client/templates/';
 var buildPath = './build';
+var testPath = './test/';
 var locale = require('./locales/en_US');
 
 
-gulp.task('default', ['watch', 'build']);
+gulp.task('default', ['watch', 'test', 'build']);
 
 gulp.task('clean', function() {
     del([buildPath]);
@@ -33,7 +35,8 @@ gulp.task('build', ['build-scripts', 'build-sass', 'build-templates']);
 
 // runs the unit tests
 gulp.task('test', function() {
-
+    gulp.src(testPath + '*.js', {read: false})
+        .pipe(mocha());
 });
 
 // compiles the javascript files
