@@ -44,4 +44,105 @@ describe('Sudoku', function() {
             assert.equal(game.getDifficulty(), consts.DIFFICULTY_EMPTY);
         });
     });
+
+    describe('#setBoard()', function() {
+        it('should return true if the board is valid', function() {
+            var game = Sudoku.empty();
+            var valid = game.setBoard(
+                'xxx|xxx|xxx' +
+                'xxx|x7x|x8x' +
+                'xxx|x9x|xxx' +
+                '―――――――――――' +
+                'xxx|x1x|xx3' +
+                '3xx|x5x|xxx' +
+                'xx6|xxx|xxx' +
+                '―――――――――――' +
+                'xxx|3xx|xxx' +
+                'xx1|x2x|xxx' +
+                'xx3|xx7|91x'
+            );
+            assert(valid);
+        });
+    });
+
+    describe('#setBoard()', function() {
+        it('should return false if the board is invalid', function() {
+            var game = Sudoku.empty();
+            var valid = game.setBoard(
+                'xxx|xxx|xxx' +
+                'xxx|x7x|x8x' +
+                'xxx|x9x|xxx' +
+                '―――――――――――' +
+                'xxx|x1x|xx3' +
+                '3xx|x5x|x8x' +
+                'xx6|xxx|xxx' +
+                '―――――――――――' +
+                '1xx|3xx|xx3' +
+                'xx1|x2x|x8x' +
+                'xx3|xx7|91x'
+            );
+            assert(!valid);
+        });
+    });
+
+
+    describe('#solve()', function() {
+        it('should solve the sudoku', function() {
+            var game = Sudoku.empty();
+            var valid = game.setBoard(
+                'xxx|xxx|xxx' +
+                'xxx|x7x|x8x' +
+                'xxx|x9x|xxx' +
+                '―――――――――――' +
+                'xxx|x1x|xx3' +
+                '3xx|x5x|xxx' +
+                'xx6|xxx|xxx' +
+                '―――――――――――' +
+                'xxx|3xx|xxx' +
+                'xx1|x2x|xxx' +
+                'xx3|xx7|91x'
+            );
+            var solution = 
+                '124|538|679' +
+                '539|176|284' +
+                '678|294|135' +
+                '―――――――――――' +
+                '245|719|863' +
+                '387|652|491' +
+                '916|483|527' +
+                '―――――――――――' +
+                '892|341|756' +
+                '761|925|348' +
+                '453|867|912';
+
+
+            game.solve();
+            assert(game.isSolved());
+            assert.equal(game.toString().replace(/\n/g, ''), solution);
+        });
+    });
+
+
+    describe('#toString()', function() {
+        it('should return the string reprentation of the sudoku', function() {
+            var game = Sudoku.empty();
+            var board = 
+                'xxx|xxx|xxx' +
+                'xxx|x7x|x8x' +
+                'xxx|x9x|xxx' +
+                '―――――――――――' +
+                'xxx|x1x|xx3' +
+                '3xx|x5x|xxx' +
+                'xx6|xxx|xxx' +
+                '―――――――――――' +
+                'xxx|3xx|xxx' +
+                'xx1|x2x|xxx' +
+                'xx3|xx7|91x';
+
+            game.setBoard(board);
+   
+            assert.equal(game.toString().replace(/\n/g, ''), board);
+        });
+    });
+
 });
