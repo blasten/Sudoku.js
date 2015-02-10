@@ -85,11 +85,10 @@ describe('Sudoku', function() {
         });
     });
 
-
     describe('#solve()', function() {
         it('should solve the sudoku', function() {
             var game = Sudoku.empty();
-            var valid = game.setBoard(
+            game.setBoard(
                 'xxx|xxx|xxx' +
                 'xxx|x7x|x8x' +
                 'xxx|x9x|xxx' +
@@ -122,7 +121,6 @@ describe('Sudoku', function() {
         });
     });
 
-
     describe('#toString()', function() {
         it('should return the string reprentation of the sudoku', function() {
             var game = Sudoku.empty();
@@ -142,6 +140,31 @@ describe('Sudoku', function() {
             game.setBoard(board);
    
             assert.equal(game.toString().replace(/\n/g, ''), board);
+        });
+    });
+
+    describe('#clone()', function() {
+        it('should keep the same board', function() {
+            var game = Sudoku.empty();
+            var board = 
+                'xxx|xxx|xxx' +
+                'xxx|x7x|x8x' +
+                'xxx|x9x|xxx' +
+                '―――――――――――' +
+                'xxx|x1x|xx3' +
+                '3xx|x5x|xxx' +
+                'xx6|xxx|xxx' +
+                '―――――――――――' +
+                'xxx|3xx|xxx' +
+                'xx1|x2x|xxx' +
+                'xx3|xx7|91x';
+
+            game.setBoard(board);
+
+            var gameCopy = game.clone();
+
+            assert(game !== gameCopy);
+            assert.equal(game.toString(), gameCopy.toString());
         });
     });
 
