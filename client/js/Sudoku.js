@@ -3,19 +3,32 @@
 var assert = require('./assert');
 var consts = require('./constants');
 
-
+/**
+ * Constructs a Sudoku
+ *
+ * @param difficulty Number[0-5] for the difficulty
+ * check ./constants for more information
+ */
 function Sudoku(difficulty) {
     this.setDifficulty(difficulty);
 
     // allocate storage
+    this._hasSolution = false;
     this._board = new Array(consts.BOARD_SIZE);
+    this._solution = new Array(consts.BOARD_SIZE);
+
     for (var i = 0; i < consts.BOARD_SIZE; i++) {
-       this._board[i] = new Array(consts.BOARD_SIZE);
+        this._board[i] = new Array(consts.BOARD_SIZE);
+        this._solution[i] = new Array(consts.BOARD_SIZE);
     }
 
     this.resetGame();
 }
-
+/**
+ * Clears the game board
+ *
+ * @param onlyUserInput Boolean true if you want to only clear the values the user entered
+ */
 Sudoku.prototype.clearBoard = function(onlyUserInput) {
     var row, column;
     if (onlyUserInput) {
@@ -28,6 +41,8 @@ Sudoku.prototype.clearBoard = function(onlyUserInput) {
         }
     } else {
         this._predefined = {};
+        this._hasSolution = false;
+
         for (row = 0; row < consts.BOARD_SIZE; row++) {
             for (column = 0; column < consts.BOARD_SIZE; column++) {
                 this._board[row][column] = consts.EMPTY_CELL;
@@ -35,60 +50,151 @@ Sudoku.prototype.clearBoard = function(onlyUserInput) {
         }
     }
 };
-
+/**
+ * Sets the difficulty
+ *
+ * @param difficulty Number[0-5] for the difficulty
+ */
 Sudoku.prototype.setDifficulty = function(difficulty) {
     assert(difficulty >= consts.DIFFICULTY_BEGINNER && difficulty <= consts.DIFFICULTY_EMPTY, 
             difficulty + ' is not a valid difficulty');
 
     this._difficulty = difficulty;
 };
-
+/**
+ * Gets the difficulty
+ *
+ * @return Number[0-5] the current difficulty
+ */
 Sudoku.prototype.getDifficulty = function() {
     return this._difficulty;
 };
-
+/**
+ * Resets the game, that is, it will create a whole new game
+ *
+ */
 Sudoku.prototype.resetGame = function() {
     var ii, candidate;
     var hints = [40, 30, 25, 20, 15, 0];
-    var hh = hints[this._difficulty];
+    var hh = (consts.BOARD_SIZE * consts.BOARD_SIZE) - hints[this._difficulty];
     var set = [];
 
+    // clear the game board
     this.clearBoard();
+    // build a solution
+    this._solveGame(true);
 
-    for (var i = 0, j; i < consts.BOARD_SIZE; i++) {
-        for (j = 0; j < consts.BOARD_SIZE; j++) {
-            set.push([i, j]);
+    for (var row = 0, column; row < consts.BOARD_SIZE; row++) {
+        for (column = 0; column < consts.BOARD_SIZE; column++) {
+            // insert the pair into a set that will hold all the predefined or preselected values
+            set.push([row, column]);
+            this._predefined[row * consts.BOARD_SIZE + column] = true;
+            this._solution[row][column] = this._board[row][column];
         }
     }
-
+    // lets take values out of the set and define them as empty cells
     while (hh > 0 && set.length > 0) {
         ii = parseInt(Math.random() * set.length);
         candidate = set[ii];
-        if (this.pickNumberForCellAt.apply(this, candidate)) {
-            this._predefined[candidate[0] * consts.BOARD_SIZE + candidate[1] ] = true;
-        }
+        
+        this._board[candidate[0]][candidate[1]] = consts.EMPTY_CELL;
+        this._predefined[candidate[0] * consts.BOARD_SIZE + candidate[1]] = false;
+
         set.splice(ii, 1);
         hh--;
     }
-};
 
-Sudoku.prototype.pickNumberForCellAt = function(row, column) {
-    for (var guess = 1; guess <= 9; guess++) {
-        if (this.isSolutionFor(guess, row, column)) {
-            this._board[row][column] = guess;
-            return guess;
+    this._hasSolution = true;
+};
+/**
+ * Gets all the user values that are causing conflicts with another values
+ *
+ * @return Object
+ */
+Sudoku.prototype.getAllConflicts = function() {
+    var currentBox, subConflict, conflictBox, subsetConflicts;
+    var added = {};
+    var conflictCells = [], conflictRows = [], conflictColumns = [], conflictBoxes = [];
+
+    for (var row = 0; row < consts.BOARD_SIZE; row++) {
+        for (var column = 0; column < consts.BOARD_SIZE; column++) {
+            if (this.isPredefined(row, column)) {
+                continue;
+            }
+            if (this._board[row][column] === consts.EMPTY_CELL) {
+                continue;
+            }
+
+            subsetConflicts = this.getConflictsFor(this._board[row][column], row, column);
+            currentBox = this.getBoxIndexFor(row, column);
+
+            if (subsetConflicts.length > 0) {
+                if (!added[row + ',' + column]) {
+                    added[row + ',' + column] = true;
+                    conflictCells.push([row, column]);
+                }
+            }
+            for (var i = 0; i < subsetConflicts.length; i++) {
+                subConflict = subsetConflicts[i];
+                conflictBox = this.getBoxIndexFor(subConflict[0], subConflict[1]);
+
+                if (currentBox != conflictBox) {
+                    if (subConflict[0] === row && conflictRows.indexOf(subConflict[0]) === -1) {
+                        conflictRows.push(subConflict[0]);
+                    }
+                    if (subConflict[1] == column && conflictColumns.indexOf(subConflict[1]) === -1) {
+                        conflictColumns.push(subConflict[1]);
+                    }
+                } else {
+                    if (conflictBoxes.indexOf(conflictBox) === -1) {
+                        conflictBoxes.push(conflictBox);
+                    }
+                }
+                if (!added[subConflict[0] + ',' + subConflict[1]]) {
+                    added[subConflict[0] + ',' + subConflict[1]] = true;
+                    conflictCells.push(subConflict);
+                }
+            }
         }
     }
 
-    this._board[row][column] = consts.EMPTY_CELL;
-    return 0;
+    return {
+        cells: conflictCells,
+        rows: conflictRows,
+        columns: conflictColumns,
+        boxes: conflictBoxes
+    };
 };
-
+/**
+ * Gets the box index for a cell at a given row and column
+ *
+ * @return Number in range the [0-8]
+ */
+Sudoku.prototype.getBoxIndexFor = function(row, column) {
+    return parseInt(row/3) * 3 + parseInt(column/3);
+};
+/**
+ * Gets the box index for a cell at a given row and column
+ *
+ * @return Number in range the [0-8]
+ */
 Sudoku.prototype.isSolutionFor = function(guess, row, column) {
     return this.getConflictsFor(guess, row, column, true).length === 0;
 };
-
+/**
+ * Lists the possible conflicts if avalue is placed at a given row and column
+ *
+ * @param guess Number
+ * @param row Number
+ * @param column Number
+ * @param onlyOne Boolean 
+ * @return Array of pairs where the 1st value in the pair represents the row and the 2sd the column 
+ */
 Sudoku.prototype.getConflictsFor = function(guess, row, column, onlyOne) {
+    guess = parseInt(guess);
+    row = parseInt(row);
+    column = parseInt(column);
+
     assert(guess >= 1 && guess <= 9, 'Guess should be in range [1-9]');
     assert(row >= 0 && row <= consts.BOARD_SIZE, 'Invalid row ' + row);
     assert(column >= 0 && column <= consts.BOARD_SIZE, 'Invalid column ' + column);
@@ -130,7 +236,16 @@ Sudoku.prototype.getConflictsFor = function(guess, row, column, onlyOne) {
 
     return conflicts;
 };
-
+/**
+ * Tries to set an arbitrary configuration. 
+ * The process may fail if the configuration can't be a valid sudoku
+ *
+ * @param board String
+ * @param row Number
+ * @param column Number
+ * @param onlyOne Boolean 
+ * @return Array of pairs where the 1st value in the pair represents the row and the 2sd the column 
+ */
 Sudoku.prototype.setBoard = function(board) {
     assert(typeof board === 'string', 'The board should be a string');
 
@@ -162,20 +277,62 @@ Sudoku.prototype.setBoard = function(board) {
     }
     return true;
 };
-
+/**
+ * Returns true if the value at a given row and column was predefined or preassigned by the system
+ *
+ * @return Boolean
+ */
 Sudoku.prototype.isPredefined = function(row, column) {
     return this._predefined[row * consts.BOARD_SIZE + column] === true;
 };
-
+/**
+ * Solves the puzzle
+ *
+ * @return Boolean true if it was successfully solved
+ */
 Sudoku.prototype.solve = function() {
+ 
+    if (this._hasSolution) {
+        // if know a solution for it
+        for (var row = 0; row < consts.BOARD_SIZE; row++) {
+            for (var column = 0; column < consts.BOARD_SIZE; column++) {
+                if (!this.isPredefined(row, column)) {
+                    this._board[row][column] = this._solution[row][column];
+                }
+            }
+        }
+        return true;
+    } else {
+        return this._solveGame(false); 
+    }
+};
+/**
+ * Solves a game
+ * This is a backtracking algorithm, or a simple brute force :( 
+ * where we generate all the possible configurations until we find a solution for our original problem
+ *
+ * @return Boolean true if the game was successfully solved
+ */
+Sudoku.prototype._solveGame = function(random) {
+    var options = [];
+    for (var num = 1; num <= 9; num++) {
+        options.push(num);
+    }
+
+    if (random) {
+        // shuffle the array
+        options.sort(function() {
+            return parseInt(Math.random() * 3) - 1;
+        });
+    }
+ 
     function solve(row, column) {
         /*jshint validthis:true */
         var num, nextRow, nextColumn;
 
-        if (row >= consts.BOARD_SIZE || column >= consts.BOARD_SIZE) {
+        if (row >= consts.BOARD_SIZE) {
             return true;
         }
-
         if (column + 1 < consts.BOARD_SIZE) {
             nextRow = row;
             nextColumn = column + 1;
@@ -188,12 +345,12 @@ Sudoku.prototype.solve = function() {
             return solve.call(this, nextRow, nextColumn);
         }
 
-        for (num = 1; num <= 9; num++) {
-            if (!this.isSolutionFor(num, row, column)) {
+        for (num = 0; num < 9; num++) {
+            if (!this.isSolutionFor(options[num], row, column)) {
                 continue;
             }
 
-            this._board[row][column] = num;
+            this._board[row][column] = options[num];
 
             if (solve.call(this, nextRow, nextColumn)) {
                 return true;
@@ -202,12 +359,17 @@ Sudoku.prototype.solve = function() {
                 this._board[row][column] = consts.EMPTY_CELL;
             }
         }
+        return false;
     }
 
     this.clearBoard(true);
     return solve.call(this, 0, 0);
 };
-
+/**
+ * Checks whether the game is solved
+ *
+ * @return Boolean true if the game was already solved
+ */
 Sudoku.prototype.isSolved = function() {
     for (var row = 0; row < consts.BOARD_SIZE; row++) {
         for (var column = 0; column < consts.BOARD_SIZE; column++) {
@@ -224,7 +386,11 @@ Sudoku.prototype.isSolved = function() {
     }
     return true;
 };
-
+/**
+ * Returns the string representation for the game
+ *
+ * @return String
+ */
 Sudoku.prototype.toString = function() {
     var str = '';
     for (var row = 0; row < consts.BOARD_SIZE; row++) {
@@ -248,6 +414,11 @@ Sudoku.prototype.toString = function() {
     return str;
 };
 
+/**
+ * Clones the current state of the game
+ *
+ * @return Sudoku
+ */
 Sudoku.prototype.clone = function() {
     var copy = Sudoku.empty();
     for (var row = 0; row < consts.BOARD_SIZE; row++) {
@@ -257,21 +428,76 @@ Sudoku.prototype.clone = function() {
     }
     return copy;
 };
-
-Sudoku.prototype.forEachCell = function(fn) {
+/**
+ * Interates through each cell in the board
+ *
+ * @param fn Function
+ * @param target Object The target that fn will be bound to
+ * @return Sudoku
+ */
+Sudoku.prototype.forEachCell = function(fn, target) {
+    target = target || this;
     var copy = Sudoku.empty();
     for (var row = 0; row < consts.BOARD_SIZE; row++) {
         for (var column = 0; column < consts.BOARD_SIZE; column++) {
-            fn.call(this, this._board[row][column], this.isPredefined(row, column), row, column);
+            fn.call(target, this._board[row][column], row, column);
         }
     }
     return copy;
 };
-
-Sudoku.prototype.forValueAtCell = function(row, column) {
+/**
+ * Gets the value stored at a cell at a given row and column
+ *
+ * @param row Number
+ * @param column Number
+ * @return Number
+ */
+Sudoku.prototype.getCellAt = function(row, column) {
     return this._board[row][column];
 };
+/**
+ * Sets the value for a cell at a given row and column
+ *
+ * @param num Number
+ * @param row Number
+ * @param column Number
+ */
+Sudoku.prototype.setCellAt = function(num, row, column) {
+    num = parseInt(num);
+    row = parseInt(row);
+    column = parseInt(column);
 
+    if (!this.isPredefined(row, column)) {
+        this._board[row][column] = num;
+    }
+};
+/**
+ * Gets the next value that will solve the puzzle
+ *
+ * @return Object
+ */
+Sudoku.prototype.getNextAnswer = function() {
+     for (var row = 0; row < consts.BOARD_SIZE; row++) {
+        for (var column = 0; column < consts.BOARD_SIZE; column++) {
+            if (this.isPredefined(row, column)) {
+                continue;
+            }
+            if (this._board[row][column] === this._solution[row][column]) {
+                continue;
+            }
+            return {
+                row: row,
+                column: column,
+                answer: this._solution[row][column]
+            };
+        }
+    }
+    return null;
+};
+
+/**
+ * Factory methods
+ */
 Sudoku.beginner = function() {
     return new Sudoku(consts.DIFFICULTY_BEGINNER);
 };
