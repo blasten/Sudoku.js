@@ -1,0 +1,19 @@
+<div class="sudoku-game">
+    <div class="sudoku-header">
+        <div class="sudoku-intro">Select a level to start the game!</div>
+        <div class="sudoku-controls"> {{> partials/controls}}</div>
+    </div>
+    <div class="box-effect">
+        <div class="flipper">
+            <div class="front">
+                {{> partials/dropdown_menu}}
+            </div>
+             <div class="back">
+                {{> partials/sudoku_container}}
+            </div>
+            <div class="left"></div>
+            <div class="right"></div>
+        </div>
+    </div>
+    {{> partials/sudoku_timer}}
+</div>
