@@ -55,7 +55,8 @@ Board.prototype.build = function() {
                 
                 // add text input
                 var input = document.createElement('input');
-                input.type = 'text';
+                input.setAttribute('type', 'number');
+
                 input.dataset.row = row;
                 input.dataset.column = column;
 
@@ -145,10 +146,20 @@ Board.prototype.nextHint = function() {
     this._checkSolution();
     cell.classList.add('cell-hint');
 
-    // set focus for the next text field
+    this._focusNextTextField(nextAnswer.row, nextAnswer.column);
+
+    setTimeout(function() {
+        cell.classList.remove('cell-hint');
+    }, 500);
+};
+/*
+ * Sets the focus to the text field next to a given row and column
+ */
+Board.prototype._focusNextTextField = function(fromRow, fromColumn) {
+    fromRow = parseInt(fromRow);
+    fromColumn = parseInt(fromColumn) + 1;
     var nextFieldFound = false;
-    var fromColumn = nextAnswer.column + 1;
-    for (var row = nextAnswer.row; row < consts.BOARD_SIZE && !nextFieldFound; row++) {
+    for (var row = fromRow; row < consts.BOARD_SIZE && !nextFieldFound; row++) {
         for (var column = fromColumn; column < consts.BOARD_SIZE && !nextFieldFound; column++) {
             if (!this._sudoku.isPredefined(row, column)) {
                 setTimeout(this.focusField.bind(this, row, column), 200);
@@ -157,23 +168,19 @@ Board.prototype.nextHint = function() {
         }
         fromColumn = 0;
     }
-
-    setTimeout(function() {
-        cell.classList.remove('cell-hint');
-    }, 500);
 };
-
 /*
  * Add all the event listeners
  */
 Board.prototype._addEventListeners = function() {
     // we delegate the event handling for each text input to the this._container
     this._container.addEventListener('keydown', this._keydownHandler.bind(this), false);
-    this._container.addEventListener('keyup', this._keyupHandler.bind(this), false);
 };
-
+/*
+ * Handles the keydown event
+ */
 Board.prototype._keydownHandler = function(event) {
-    var digit, row, column;
+    var digit, row, column, conflicts;
     var input = event.target;
     var tab = 9;
     var zero = 48;
@@ -200,21 +207,21 @@ Board.prototype._keydownHandler = function(event) {
         input.value = digit;
         this._sudoku.setCellAt(digit, row, column);
     }
-    
-    input.classList.remove('cell-hint');
-    this._presentConflicts();
-    this._checkSolution();
 
+    input.classList.remove('cell-hint');
+
+    conflicts = this._presentConflicts();
+
+    if (conflicts === 0 && digit >= 1 && digit <= 9) {
+        this._focusNextTextField(row, column);
+    }
+
+    this._checkSolution();
     event.preventDefault();
 };
-
-Board.prototype._keyupHandler = function(event) {
-    var input = event.target;
-    if (!input && input.tagName !== 'INPUT') {
-        return;
-    }
-};
-
+/*
+ * Presents the conflicts
+ */
 Board.prototype._presentConflicts = function() {
     var conflicts = this._sudoku.getAllConflicts();
     var cellWithConflict = {};
@@ -251,6 +258,8 @@ Board.prototype._presentConflicts = function() {
             this._boxes[box].classList.remove('box-has-conflict');
         }
     }, this);
+
+    return  conflicts.cells.length;
 };
 
 Board.prototype._checkSolution = function() {
