@@ -114,10 +114,17 @@ describe('Sudoku', function() {
                 '761|925|348' +
                 '453|867|912';
 
-
             game.solve();
             assert(game.isSolved());
             assert.equal(game.toString().replace(/\n/g, ''), solution);
+
+            var game2 = Sudoku.beginner();
+            game2.solve();
+            assert(game2.isSolved());
+
+            var game3 = Sudoku.expert();
+            game3.solve();
+            assert(game3.isSolved());
         });
     });
 
