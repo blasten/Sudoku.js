@@ -1,0 +1,78 @@
+body {
+    background-color: #F2F7E5;
+    margin: 0;
+}
+
+h1 {
+    font-family: $default-font-family;
+    text-align: center;
+    letter-spacing: -2px;
+    font-size: 30px;
+    line-height: 50px;
+}
+
+footer {
+    font-family: $default-font-family;
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+    position: absolute;
+    bottom: 0px;
+    line-height: 30px;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    a {
+        color: #666;
+        text-decoration: none;
+    }
+    a:hover {
+        text-decoration: underline;
+    }
+}
+
+.sudoku-header {
+    position: relative;
+  
+    padding-bottom: 20px;
+    .sudoku-controls {
+        .btn-back {
+            padding-left: 7px;
+            padding-right: 12px;
+            font-weight: bold;
+        }
+        text-align: center;
+        width: 100%;
+    }
+    .sudoku-intro {
+        @include transition-property(opacity);
+        @include transition-duration(1s);
+
+        opacity: 1;
+        font-family: $default-font-family;
+        font-size: 15px;
+        position: absolute;
+        top: 0;
+        text-align: center;
+        width: 100%;
+    }
+}
+
+.centered-box {
+    margin: auto;
+    position: absolute;
+    top: -100px; 
+    left: 0; 
+    bottom: 0; 
+    right: 0; 
+    width: 364px; 
+    height: 550px;
+}
+
+@media screen and ( max-height: 600px ) {
+    .centered-box {
+        position: static;
+        top: 0; 
+        left: 0; 
+    }
+}

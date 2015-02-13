@@ -1,0 +1,199 @@
+.sudoku-container {
+  width: $board-size;
+  height: $board-size;
+  border: 2px solid #A3D900;
+  box-sizing: border-box;
+  background-color: white;
+  margin: auto;
+
+  .box { 
+    width: 33.33%;
+    height: 33.33%;
+    float: left;
+    border-right: 1px solid #A3D900;
+    border-bottom: 1px solid #A3D900;
+    @include box-sizing(border-box);
+    transition: background-color 1s; 
+  }
+
+  .box:nth-child(3),
+  .box:nth-child(6),
+  .box:nth-child(9) {
+    border-right: none;
+  }
+
+  .box:nth-child(7),
+  .box:nth-child(8),
+  .box:nth-child(9) {
+    border-bottom: none;
+  }
+
+  .cell:nth-child(3), 
+  .cell:nth-child(6),
+  .cell:nth-child(9) {
+    border-right: none; 
+  }
+
+  .cell:nth-child(7), 
+  .cell:nth-child(8), 
+  .cell:nth-child(9) {
+    border-bottom: none;
+  }
+
+  .cell {
+    width: 33.33%;
+    height: 33.33%;
+    float: left;
+    transition: background-color 1s;
+    font-size: 40px;
+    color: #666;
+    text-align: center;
+    border-right: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    @include box-sizing(border-box);
+
+    input {
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      text-align: center;
+      font-size: 30px;
+      border: none;
+      outline: none;
+      background: transparent;
+      border-radius: 0;
+      @include transition-property-with-prefix(box-shadow);
+      @include transition-duration(0.5s);
+      font-weight: 300; 
+      font-family: $default-font-family;
+    }
+
+    input:focus {
+      box-shadow: inset 0px 0px 5px #999;
+    }
+  }
+ 
+  .row-has-conflict, .column-has-conflict, .box-has-conflict {
+    background-color: #FFE0E0;
+  }
+  
+  .cell-has-conflict {
+    input {
+      color: #cc0000;
+      @include animation(shake 0.5s);
+    }
+    input:focus {
+      @include transition(none);
+      box-shadow: none;
+    }
+  }
+  
+  .cell-is-predefined input {
+    color: #bbb;
+    -webkit-text-fill-color:#bbb
+  }
+
+  .cell-hint {
+    input{
+      @include transition-property(none);
+      @include animation(hint 0.3s cubic-bezier(0.56, 0.98, 0.475, 1.45));
+    }
+    input:focus {
+      box-shadow: none;
+    }
+  }
+ 
+  .sudoku-solved {
+    width: 100%;
+    height: 100%;
+    @include animation(solved 0.5s);
+    input {
+      color: green;
+    }
+  }
+  
+  .cell-fade-in input {
+    @include animation(fadein 1.5s);
+  }
+}
+
+// When you show a hint 
+@include keyframes(hint) {
+  from {
+    @include transform(scale3d(3, 3, 1));
+    opacity: 0;
+  }
+  to {
+    @include transform(scale3d(1, 1, 1));
+    opacity: 1;
+  }
+}
+
+// Just a fade in
+@include keyframes(fadein) {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// When you solved the sudoku
+@include keyframes(solved) {
+  0% {
+    @include transform(scale3d(2, 2, 1));
+  }
+  15% {
+    @include transform(scale3d(1, 1, 1));
+  }
+  45% {
+    @include transform(scale3d(1.5, 1.5, 1));
+  }
+  65% {
+    @include transform(scale3d(1, 1, 1));
+  }
+  75% {
+    @include transform(scale3d(1.25, 1.25, 1));
+  }
+  100% {
+    @include transform(scale3d(1, 1, 1));
+  } 
+}
+
+// When you entered a wrong value
+@include keyframes(shake) {
+  0% {
+    @include transform(translate(2px, 1px) rotate(0deg));
+  }
+  10% {
+    @include transform(translate(-1px, -2px) rotate(-1deg));
+  }
+  20% {
+    @include transform(translate(-3px, 0px) rotate(1deg));
+  }
+  30% {
+    @include transform(translate(0px, 2px) rotate(0deg));
+  }
+  40% {
+    @include transform(translate(1px, -1px) rotate(1deg));
+  }
+  50% {
+    @include transform(translate(-1px, 2px) rotate(-1deg));
+  }
+  60% {
+    @include transform(translate(-3px, 1px) rotate(0deg));
+  }
+  70% {
+    @include transform(translate(2px, 1px) rotate(-1deg));
+  }
+  80% {
+    @include transform(translate(-1px, -1px) rotate(1deg));
+  }
+  90% {
+    @include transform(translate(2px, 2px) rotate(0deg));
+  }
+  100% {
+    @include transform(translate(1px, -2px) rotate(-1deg));
+  }
+}

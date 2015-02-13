@@ -1,0 +1,110 @@
+@mixin perspective($perspective) {
+  -webkit-perspective: $perspective;
+     -moz-perspective: $perspective;
+      -ms-perspective: $perspective;
+       -o-perspective: $perspective;
+          perspective: $perspective;
+}
+
+@mixin transition-property($property) {
+  -webkit-transition-property: $property;
+     -moz-transition-property: $property;
+      -ms-transition-property: $property;
+       -o-transition-property: $property;
+          transition-property: $property;
+}
+
+@mixin transition-property-with-prefix($property) {
+  -webkit-transition-property: -webkit-$property;
+     -moz-transition-property: -moz-$property;
+      -ms-transition-property: -ms-$property;
+       -o-transition-property: -o-$property;
+          transition-property: $property;
+}
+
+@mixin transition-duration($duration) {
+  -webkit-transition-duration: $duration;
+     -moz-transition-duration: $duration;
+      -ms-transition-duration: $duration;
+       -o-transition-duration: $duration;
+          transition-duration: $duration;
+}
+
+@mixin transition-timing-function($value) {
+  -webkit-transition-timing-function: $value;
+     -moz-transition-timing-function: $value;
+      -ms-transition-timing-function: $value;
+       -o-transition-timing-function: $value;
+          transition-timing-function: $value;
+}
+
+@mixin animation($value) {
+  -webkit-animation: $value;
+     -moz-animation: $value;
+      -ms-animation: $value;
+       -o-animation: $value;
+          animation: $value;
+}
+
+@mixin transform-style($value) {
+  -webkit-transform-style: $value;
+     -moz-transform-style: $value;
+      -ms-transform-style: $value;
+       -o-transform-style: $value;
+          transform-style: $value;
+}
+
+@mixin backface-visibility($value) {
+  -webkit-backface-visibility: $value;
+     -moz-backface-visibility: $value;
+      -ms-backface-visibility: $value;
+       -o-backface-visibility: $value;
+          backface-visibility: $value;
+}
+
+@mixin transform($value) {
+  -webkit-transform: $value;
+     -moz-transform: $value;
+      -ms-transform: $value;
+       -o-transform: $value;
+          transform: $value;
+}
+
+@mixin transition($value) {
+  -webkit-transition: $value;
+     -moz-transition: $value;
+      -ms-transition: $value;
+       -o-transition: $value;
+          transition: $value;
+}
+
+@mixin transition-delay($value) {
+  -webkit-transition-delay: $value;
+     -moz-transition-delay: $value;
+      -ms-transition-delay: $value;
+       -o-transition-delay: $value;
+          transition-delay: $value;
+}
+
+@mixin box-sizing($value) {
+  -webkit-box-sizing: $value;
+     -moz-box-sizing: $value;
+      -ms-box-sizing: $value;
+       -o-box-sizing: $value;
+          box-sizing: $value;
+}
+
+@mixin keyframes($name) {
+  @-webkit-keyframes #{$name} {
+    @content; 
+  }
+  @-moz-keyframes #{$name} {
+    @content;
+  }
+  @-ms-keyframes #{$name} {
+    @content;
+  }
+  @keyframes #{$name} {
+    @content;
+  } 
+}

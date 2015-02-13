@@ -1,0 +1,36 @@
+.dropdown-group{
+    .dropdown-menu {
+        padding: 0;
+        width: 300px;
+        background-color: #A3D900;
+        overflow: hidden;
+
+        li[role="menuitem"] {
+            display: block;
+            list-style: none;
+            color: #81AD00;
+            font-family: $default-font-family;
+            font-weight: bold;
+            font-size: 20px;
+            line-height: 44px;
+            padding-left: 20px;
+            outline: 0;
+            cursor: pointer;
+            color: white;
+            transition:  padding-left 0.1s;
+        }
+    
+        li[role="menuitem"]:focus {
+            background-color: #89B800;
+        }
+
+        li[role="menuitem"]:hover {
+            background-color: #89B800;
+            padding-left: 40px;
+        }
+
+        li[role="menuitem"]:active {
+            box-shadow: inset 0 0 2px #658700
+        }
+    }
+}
