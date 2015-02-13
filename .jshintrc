@@ -12,6 +12,10 @@
         "before"     : false,
         "beforeEach" : false,
         "after"      : false,
-        "afterEach"  : false
+        "afterEach"  : false,
+        "document"   : false,
+        "HTMLElement": false,
+        "window"     : false,
+        "confirm"    : false
     }
 }
