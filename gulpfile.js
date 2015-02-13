@@ -61,7 +61,6 @@ gulp.task('build-sass', function() {
         .pipe(gulp.dest(buildPath + '/css'))
         .pipe(sourcemaps.init())
         .pipe(minifyCSS())
-        .pipe(sourcemaps.write())
         .pipe(rename('app.min.css'))
         .pipe(gulp.dest(buildPath + '/css'));
 });
